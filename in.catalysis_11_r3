@@ -1,0 +1,41 @@
+#2024-09-04 12:48:42.605058 
+log log.catalysis_11_r3 
+units metal 
+dimension 2 
+boundary p p p 
+newton on 
+atom_style atomic 
+read_data data.catalysis_11_r3 
+pair_style airebo 3.0 1 1 
+pair_coeff * * CH.airebo C  
+ dump mydump all atom 2000 dump.catalysis_11_r3 
+dump_modify mydump sort id 
+dump_modify mydump scale no 
+fix 4 all enforce2d 
+fix 5 all box/relax iso 0.0 
+minimize 1.0e-8 0 5000 1000000 
+timestep 0.0001 
+fix 2 all langevin 0 14000 1 3699483 
+fix 3 all nve 
+fix 4 all enforce2d 
+run 1400000 
+minimize 1.0e-8 0 1 1000000 
+timestep 0.0001 
+fix 2 all langevin 14000 14000 1 3699483 
+fix 3 all nve 
+fix 4 all enforce2d 
+run 1000000 
+minimize 1.0e-8 0 1 1000000 
+timestep 0.0001 
+fix 2 all langevin 14000 300 1 3699483 
+fix 3 all nve 
+fix 4 all enforce2d 
+run 150700 
+minimize 1.0e-8 0 5000 1000000 
+timestep 0.0001 
+fix 2 all langevin 300 300 1 3699483 
+fix 3 all nve 
+fix 4 all enforce2d 
+run 1000000 
+minimize 1.0e-8 0 5000 1000000 
+ 
