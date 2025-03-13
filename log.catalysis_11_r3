@@ -1,0 +1,96 @@
+
+# ------------------------------------------------------------------------------
+# Basic simulation settings
+# ------------------------------------------------------------------------------
+units          metal              # Use 'metal' units
+dimension      2                  # 2D simulation
+boundary       p p p              # Periodic in x, y, z
+newton         on                 # Newton's third law for pair interactions
+atom_style     atomic             # Basic atom style (x, y, z, etc.)
+
+# ------------------------------------------------------------------------------
+# Initial structure and force field
+# ------------------------------------------------------------------------------
+read_data      data.catalysis_11_r3
+Reading data file ...
+  triclinic box = (0 0 -10.276976) to (34.43317 34.08 10.276976) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  448 atoms
+  read_data CPU = 0.012 seconds
+
+pair_style     airebo 3.0 1 1     # AIREBO potential: cutoffs = 3.0, special flags
+pair_coeff     * * CH.airebo C    # Apply AIREBO to all atoms as carbon
+Reading airebo potential file CH.airebo with DATE: 2011-10-25
+
+# ------------------------------------------------------------------------------
+# Output settings (trajectory dumps)
+# ------------------------------------------------------------------------------
+dump           mydump all atom 2000 dump.catalysis_11_r3  # Dump coordinates every 2000 steps
+dump_modify    mydump sort id                            # Sort dump atoms by ID
+dump_modify    mydump scale no                           # Do not scale positions by box dimension
+
+# ------------------------------------------------------------------------------
+# Fixes and relaxation
+# ------------------------------------------------------------------------------
+fix 4 all enforce2d             # Constrain motion to 2D
+fix 5 all box/relax iso 0.0      # Relax the box isotropically to zero pressure
+
+# ------------------------------------------------------------------------------
+# Initial minimization
+# ------------------------------------------------------------------------------
+minimize       1.0e-8 0 5000 1000000
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12.2
+  ghost atom cutoff = 12.2
+  binsize = 6.1, bins = 6 6 4
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair airebo, perpetual
+      attributes: full, newton on, ghost
+      pair build: full/bin/ghost
+      stencil: full/ghost/bin/2d
+      bin: standard
+WARNING: Energy due to 1 extra global DOFs will be included in minimizer energies
+ (../min.cpp:219)
+Per MPI rank memory allocation (min/avg/max) = 5.024 | 5.024 | 5.024 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press          Volume    
+         0   0             -3319.0279      0             -3319.0279     -653900.67      1173.4824    
+       165   0             -3327.1095      0             -3327.1095     -0.00027078286  1135.3708    
+Loop time of 1.02205 on 1 procs for 165 steps with 448 atoms
+
+76.5% CPU use with 1 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+     -3319.02791830786  -3327.10952506387  -3327.10952506504
+  Force two-norm initial, final = 957.87319 3.901647e-07
+  Force max component initial, final = 957.87319 3.901647e-07
+  Final line search alpha, max atom move = 0.14200136 5.5403917e-08
+  Iterations, force evaluations = 165 167
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 1.0074     | 1.0074     | 1.0074     |   0.0 | 98.57
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.0011297  | 0.0011297  | 0.0011297  |   0.0 |  0.11
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.00034919 | 0.00034919 | 0.00034919 |   0.0 |  0.03
+Other   |            | 0.01319    |            |       |  1.29
+
+Nlocal:            448 ave         448 max         448 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:            845 ave         845 max         845 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:        77952 ave       77952 max       77952 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 77952
+Ave neighs/atom = 174
+Neighbor list builds = 0
+Dangerous builds = 0

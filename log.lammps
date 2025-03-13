@@ -1,0 +1,8 @@
+LAMMPS (7 Feb 2024 - Development - patch_7Feb2024_update1-35-g81609d04e3)
+# ------------------------------------------------------------------------------
+# LAMMPS input script for catalysis_11_r3
+# Date/time stamp: 2024-09-04 12:48:42.605058
+# ------------------------------------------------------------------------------
+
+# Write simulation log to an external file
+log            log.catalysis_11_r3
