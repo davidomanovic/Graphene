@@ -1,0 +1,30 @@
+# ------------------------------------------------------------------------------
+# Basic simulation settings
+# ------------------------------------------------------------------------------
+units          metal              # Use 'metal' units
+dimension      2                  # 2D simulation
+boundary       p p p              # Periodic in x, y, z
+newton         on                 # Newton's third law for pair interactions
+atom_style     atomic             # Basic atom style (x, y, z, etc.)
+
+# ------------------------------------------------------------------------------
+# Initial structure and force field
+# ------------------------------------------------------------------------------
+read_data      random_carbon.data
+mass 1 11.1102
+
+pair_style     airebo 3.0 1 1     # AIREBO potential: cutoffs = 3.0, special flags
+pair_coeff     * * CH.airebo C    # Apply AIREBO to all atoms as carbon
+
+# ------------------------------------------------------------------------------
+# Fixes and relaxation
+# ------------------------------------------------------------------------------
+fix 1 all enforce2d             # Constrain motion to 2D
+fix 2 all box/relax iso 0.0      # Relax the box isotropically to zero pressure
+
+# ------------------------------------------------------------------------------
+# Initial minimization
+# ------------------------------------------------------------------------------
+minimize       1.0e-8 0 5000 1000000
+
+write_data  minimized_carbon.data   # Save the relaxed configuration

@@ -18,12 +18,6 @@ module load gcc/11.3.0
 module load openmpi/4.1.3
 module load lammps/20220107-mpi-openmp-plumed
 
-# Store the LAMMPS command and input/output file names
-LAMMPS_CMD='srun lmp'
-INPUT_FILE='in.catalysis_11_r3'
-OUTPUT_FILE='catalysis_output.out'
-
-# Run the calculation (printing command before execution)
-echo "Running $LAMMPS_CMD -in $INPUT_FILE > $OUTPUT_FILE"
-$LAMMPS_CMD -in $INPUT_FILE > $OUTPUT_FILE
+echo "Running: srun lmp -in minimize.in > MAC.out"
+srun lmp -in minimize.in > MAC.out
 
