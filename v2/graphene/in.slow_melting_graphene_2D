@@ -1,0 +1,42 @@
+# slowmelting.in
+units           metal
+dimension       2
+boundary        p p p
+atom_style      atomic
+
+read_data       graphene_5x5.lmp
+
+pair_style      airebo 3.0 1 1
+pair_coeff      * * CH.airebo C
+
+fix             1 all enforce2d
+
+timestep        0.001
+
+# Minimization
+min_style       cg
+minimize        1e-8 1e-12 10000 100000
+
+# Output thermodynamic data
+thermo_style    custom step temp epair emol etotal press
+thermo          5000       # Print every 10k steps
+thermo_modify   flush yes    # Immediately flush to log
+
+# Slowly heat from 300 K to 5000 K
+variable Tstart equal 300
+variable Tend   equal 5000
+variable Tdamp  equal 1.0
+
+fix             2 all nve
+fix             3 all langevin ${Tstart} ${Tend} ${Tdamp} 123456
+
+run             2000000      # number of steps to do the slow ramp
+
+unfix 3
+fix   4 all langevin ${Tend} ${Tend} 1.0 987654
+
+run   200000
+
+# Dump snapshots
+dump            d1 all atom 5000 slowmelt.lammpstrj
+dump_modify     d1 sort id
