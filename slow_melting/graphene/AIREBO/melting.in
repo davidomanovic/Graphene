@@ -1,0 +1,105 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# 2D Graphene: 50 K relax → heat & hold at 7 750 K & 8 100 K → finish at 8 450 K
+# ────────────────────────────────────────────────────────────────────────────────
+
+units      metal                # ps, eV
+dimension  2                    # true 2D
+boundary   p p p                # periodic x,y (z ignored under dim=2)
+timestep   0.001                # 1 fs
+
+# ─── PARAMETERS ───────────────────────────────────────────────────────────────
+variable T0      equal 50.0      # initial temperature (K)
+variable T1      equal 7750.0    # first hold temperature (K)
+variable T2      equal 8100.0    # second hold temperature (K)
+variable Tf      equal 8450.0    # final target temperature (K)
+variable gamma   equal 1e11      # heating rate (K/s)
+variable dt_s    equal 1e-15     # 1 fs = 1e‑15 s
+variable Nrelax  equal 1000000   # 1e6 steps @50 K
+variable Nhold   equal 5000      # 5 000 steps per hold
+
+# compute how many steps for each ramp: ΔT/(γ·dt)
+variable steps1  equal "(v_T1  - v_T0)/(v_gamma*v_dt_s)"
+variable steps2  equal "(v_T2  - v_T1)/(v_gamma*v_dt_s)"
+variable steps3  equal "(v_Tf  - v_T2)/(v_gamma*v_dt_s)"
+
+# ─── ATOMS & POTENTIAL ────────────────────────────────────────────────────────
+atom_style atomic
+read_data  graphene.dat         # your 1008‑atom graphene
+
+fix  br all box/relax iso 0.0 vmax 0.001
+minimize 1e-6 1e-8 10000 100000
+unfix br
+
+pair_style airebo 3.0 1 1
+pair_coeff * * CH.airebo C
+
+# ─── OUTPUT ──────────────────────────────────────────────────────────────────
+variable s equal step
+variable T equal temp
+variable E equal etotal
+fix    stats all print 1000 "${s} ${T} ${E}" file energy.txt screen no
+dump   traj  all atom   1000 dmp.lammpstrj
+dump_modify traj sort id scale no
+
+# ─── 1) INITIAL RELAXATION @ 50 K ─────────────────────────────────────────────
+velocity all create ${T0} 1337 mom yes rot yes dist gaussian
+fix    eq50 all npt temp ${T0} ${T0} 0.1 x 0.0 0.0 1.0  y 0.0 0.0 1.0  couple xy
+run    ${Nrelax}
+unfix  eq50
+
+# ─── 2) RAMP 50→7 750 K @10¹¹ K/s ────────────────────────────────────────────
+# 2a) barostat only
+fix    baro1  all nph iso 0.0 0.0 1.0 temp ${T0}
+
+# 2b) compute instantaneous Ttarget = T0 + γ·t
+variable t1     equal "step*v_dt_s"
+variable Tt1    equal "v_T0 + v_gamma*v_t1"
+
+# 2c) per‑step velocity rescale to Tt1
+fix    vres1   all temp/rescale 1 {$Tt1} {$Tt1} 0.0 1.0
+
+# 2d) run ramp1
+run    ${steps1}
+unfix  vres1
+unfix  baro1
+
+# ─── 3) HOLD @ 7 750 K for 5 000 steps ───────────────────────────────────────
+fix    hold1  all npt temp ${T1} ${T1} 0.1 x 0.0 0.0 1.0  y 0.0 0.0 1.0  couple xy
+run    ${Nhold}
+unfix  hold1
+
+# ─── 4) RAMP 7 750→8 100 K @10¹¹ K/s ────────────────────────────────────────
+fix    baro2  all nph iso 0.0 0.0 1.0 temp ${T1}
+
+variable t2     equal "step*v_dt_s"
+variable Tt2    equal "v_T1 + v_gamma*v_t2"
+
+fix    vres2   all temp/rescale 1 {$Tt2} {$Tt2} 0.0 1.0
+run    ${steps2}
+unfix  vres2
+unfix  baro2
+
+# ─── 5) HOLD @ 8 100 K for 5 000 steps ───────────────────────────────────────
+fix    hold2  all npt temp ${T2} ${T2} 0.1 x 0.0 0.0 1.0 y 0.0 0.0 1.0  couple xy
+run    ${Nhold}
+unfix  hold2
+
+# ─── 6) RAMP 8 100→8 450 K @10¹¹ K/s ────────────────────────────────────────
+fix    baro3  all nph iso 0.0 0.0 1.0 temp ${T2}
+
+variable t3     equal "step*v_dt_s"
+variable Tt3    equal "v_T2 + v_gamma*v_t3"
+
+fix    vres3   all temp/rescale 1 {$Tt3} {$Tt3} 0.0 1.0
+run    ${steps3}
+unfix  vres3
+unfix  baro3
+
+# ─── 7) FINAL HOLD @8 450 K for 5 000 steps (optional) ────────────────────────
+fix    hold3  all npt temp ${Tf} ${Tf} 0.1 x 0.0 0.0 1.0  y 0.0 0.0 1.0  couple xy
+run    ${Nhold}
+unfix  hold3
+
+# ────────────────────────────────────────────────────────────────────────────────
+# End of protocol: holds at 7750 K, 8100 K, and final 8450 K, all for 5000 steps.
+# ────────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,73 @@
+#2024-09-04 12:48:42.605058
+log log.mac
+units metal
+dimension 2
+boundary p p p
+newton on
+atom_style atomic
+
+# Read the MAC configuration data file (replace "data.mac" with your file name)
+read_data mac40x40.data
+
+# Define the potential for carbon (using AIREBO with CH.airebo potential file)
+pair_style airebo 3.0 1 1
+pair_coeff * * CH.airebo C  
+
+# Dump atom positions every 2000 steps (adjust as needed)
+dump mydump all atom 2000 dump.mac
+dump_modify mydump sort id
+dump_modify mydump scale no
+
+# Constrain the system to 2D
+fix 4 all enforce2d
+
+# Allow the simulation box to relax isotropically (set pressure to zero)
+fix 5 all box/relax iso 0.0
+
+# First minimization of the structure
+minimize 1.0e-8 0 5000 1000000
+
+# Set a small timestep for accuracy
+timestep 0.0001
+
+# Stage 1: Heat from 0 K to 14000 K using a Langevin thermostat
+fix 2 all langevin 0 14000 1 3699483
+fix 3 all nve
+fix 4 all enforce2d
+run 1400000
+
+# Quick minimization after first heating stage
+minimize 1.0e-8 0 1 1000000
+
+timestep 0.0001
+
+# Stage 2: Hold at 14000 K (no temperature change) to let the system equilibrate
+fix 2 all langevin 14000 14000 1 3699483
+fix 3 all nve
+fix 4 all enforce2d
+run 1000000
+
+# Quick minimization
+minimize 1.0e-8 0 1 1000000
+
+timestep 0.0001
+
+# Stage 3: Slowly cool the system from 14000 K down to 300 K
+fix 2 all langevin 14000 300 1 3699483
+fix 3 all nve
+fix 4 all enforce2d
+run 150700
+
+# Final minimization
+minimize 1.0e-8 0 5000 1000000
+
+timestep 0.0001
+
+# Stage 4: Equilibrate at 300 K
+fix 2 all langevin 300 300 1 3699483
+fix 3 all nve
+fix 4 all enforce2d
+run 1000000
+
+# Final minimization if desired
+minimize 1.0e-8 0 5000 1000000

@@ -1,0 +1,79 @@
+LAMMPS (7 Feb 2024 - Development - patch_7Feb2024_update1-35-g81609d04e3)
+# ────────────────────────────────────────────────────────────────────────────────
+# 2D Graphene: 50 K relax → heat & hold at 7 750 K & 8 100 K → finish at 8 450 K
+# ────────────────────────────────────────────────────────────────────────────────
+
+units      metal                # ps, eV
+dimension  2                    # true 2D
+boundary   p p p                # periodic x,y (z ignored under dim=2)
+timestep   0.001                # 1 fs
+
+# ─── PARAMETERS ───────────────────────────────────────────────────────────────
+variable T0      equal 50.0      # initial temperature (K)
+variable T1      equal 7750.0    # first hold temperature (K)
+variable T2      equal 8100.0    # second hold temperature (K)
+variable Tf      equal 8450.0    # final target temperature (K)
+variable gamma   equal 1e11      # heating rate (K/s)
+variable dt_s    equal 1e-15     # 1 fs = 1e‑15 s
+variable Nrelax  equal 1000000   # 1e6 steps @50 K
+variable Nhold   equal 5000      # 5 000 steps per hold
+
+# compute how many steps for each ramp: ΔT/(γ·dt)
+variable steps1  equal "(v_T1  - v_T0)/(v_gamma*v_dt_s)"
+variable steps2  equal "(v_T2  - v_T1)/(v_gamma*v_dt_s)"
+variable steps3  equal "(v_Tf  - v_T2)/(v_gamma*v_dt_s)"
+
+# ─── ATOMS & POTENTIAL ────────────────────────────────────────────────────────
+atom_style atomic
+read_data  graphene.dat         # your 1008‑atom graphene
+Reading data file ...
+  orthogonal box = (0 0 -10) to (51.12 51.6498 10)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  1008 atoms
+  read_data CPU = 0.004 seconds
+
+fix  br all box/relax iso 0.0 vmax 0.001
+minimize 1e-6 1e-8 10000 100000
+WARNING: Energy due to 1 extra global DOFs will be included in minimizer energies
+ (../min.cpp:219)
+WARNING: No pairwise cutoff or binsize set. Atom sorting therefore disabled. (../atom.cpp:2377)
+WARNING: Communication cutoff is 0.0. No ghost atoms will be generated. Atoms may get lost. (../comm_brick.cpp:210)
+Per MPI rank memory allocation (min/avg/max) = 3.414 | 3.414 | 3.414 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press          Volume    
+         0   0              0              0              0              0              2640.3378    
+         1   0              0              0              0              0              2640.3378    
+Loop time of 8.7062e-05 on 1 procs for 1 steps with 1008 atoms
+
+56.3% CPU use with 1 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = search direction is not downhill
+  Energy initial, next-to-last, final = 
+                     0                  0                  0
+  Force two-norm initial, final = 0 0
+  Force max component initial, final = 0 0
+  Final line search alpha, max atom move = 0 0
+  Iterations, force evaluations = 1 0
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 8.31e-07   | 8.31e-07   | 8.31e-07   |   0.0 |  0.95
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 8.623e-05  |            |       | 99.05
+
+Nlocal:           1008 ave        1008 max        1008 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:             46 ave          46 max          46 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 0
+Ave neighs/atom = 0
+Neighbor list builds = 0
+Dangerous builds = 0

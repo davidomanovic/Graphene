@@ -1,0 +1,48 @@
+# 2D Graphene Melting Simulation – NPT Controlled Heating
+units           metal
+dimension       2
+boundary        p p p
+atom_style      atomic
+read_data       graphene.dat
+newton          on
+fix             enforce all enforce2d
+pair_style      lcbop
+pair_coeff      * * C.lcbop C
+timestep        0.001   # fs
+
+# ------------- Output ---------------------------------------------------------------
+thermo          10000
+thermo_style    custom step temp pe ke etotal press vol
+dump            traj  all atom 1000 dmp.lammpstrj
+dump_modify     traj sort id scale no
+
+variable s equal step
+variable T equal temp
+variable E equal etotal
+fix    stats all print 10000 "${s} ${T} ${E}" file energy.txt screen no
+#------------------------------------------------------------------------------------
+
+# --------- Minimization (quasi-static relaxation) ----------------------------------
+min_style       cg
+minimize        1.0e-6 1.0e-6 100000 100000
+
+# --------- 10 K NPT Relaxation (10 ps = 100000 steps = 0.1 fs) ----------
+velocity        all create 10.0 12345 mom yes dist gaussian
+fix             npt_relax all npt temp 10.0 10.0 20.0 x 0.0 0.0 100.0 y 0.0 0.0 100.0
+run             500000
+unfix           npt_relax
+
+# --------- Heating from 10 K to 4000 K over 4M steps ----------
+fix             heating all npt temp 10 4000 20.0 x 0.0 0.0 100.0 y 0.0 0.0 100.0
+run             4000000
+
+# --------- Heating from 4000 K to 7000 K over 3M steps ----------
+fix             heating all npt temp 4000 7000 100.0 x 0.0 0.0 100.0 y 0.0 0.0 100.0
+run             3000000
+
+fix             heating all npt temp 7000 300 10.0 x 0.0 0.0 100.0 y 0.0 0.0 100.0
+run             1000000
+minimize        1.0e-6 1.0e-6 100000 100000
+unfix heating
+
+write_data      graphene_heated.data

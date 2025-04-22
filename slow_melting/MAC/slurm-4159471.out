@@ -1,0 +1,1 @@
+Running: srun lmp -in mac_heating.in > MAC.out
