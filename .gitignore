@@ -1,0 +1,63 @@
+# LAMMPS trajectory files
+*.lammpstrj
+*.dcd
+*.xtc
+*.trr
+
+# Dump and custom output
+dump.*
+*.dump
+*.traj
+*.xyz
+*.vtk
+
+# Velocity or thermodynamic output
+velocities_*.eq
+energy.txt
+*.log
+*.dat
+
+# Restart and checkpoint files
+*.restart
+*.restart*
+*.bin
+*.chk
+*.chkpt
+
+# Temporary or backup files
+*.bak
+*.tmp
+*.swp
+*.old
+*~
+
+# Minimized/relaxed structures
+minimized_*.data
+*.eq.data
+*.relaxed
+
+# Postprocessing outputs
+*.png
+*.jpg
+*.pdf
+*.csv
+*.npz
+*.npy
+*.h5
+
+# Python notebooks and cache
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+
+# Jupyter output
+*.out
+*.err
+
+# VMD or OVITO visualization files
+*.vmd
+*.ovito
+
+# VSCode or editor config
+.vscode/
+*.code-workspace

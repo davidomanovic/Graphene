@@ -1,0 +1,108 @@
+units       metal 
+dimension   2 
+boundary    p p p 
+newton      on 
+atom_style  atomic 
+read_data   graphene.dat
+fix         f2d all enforce2d
+pair_style  airebo 3.0 1 1 
+pair_coeff  * * CH.airebo C  
+timestep    0.0001
+
+# Calculations
+compute     peatom all pe/atom
+compute pe  all reduce sum c_peatom
+# ---
+variable    ke equal ke
+variable    s equal step
+variable    T equal temp
+variable    E equal etotal
+variable    PEatom equal c_pe/count(all)
+variable    Tdamp equal $(100.0*dt) # Avoid wild fluctuations by choosing appropriate damping
+
+# Output
+fix         stats all print     10000 "${s} ${T} ${E} ${ke} ${PEatom}" file energy.txt screen no
+dump        melting  all atom   10000 graphene.lammpstrj
+dump        vel all custom      10000 velocities.txt id vx vy vz
+dump_modify melting sort id
+dump_modify vel sort id
+
+# Equilibration - create initial Maxwellian velocities at 50 K
+velocity    all create 50.0 12345 mom yes rot yes dist gaussian
+fix         1 all npt temp 50.0 50.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         250000
+write_data  50K_eq.data  #structure
+
+# 1: HEAT TO 7000 K
+fix         1 all npt temp 50.0 7000.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         2000000
+
+# 2: HOLD
+fix         1 all npt temp 7000.0 7000.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         100000
+
+write_data  7000K_eq.data #structure
+
+# 1: HEAT
+fix         1 all npt temp 7000.0 7500.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         500000
+
+# 2: HOLD
+fix         1 all npt temp 7500.0 7500.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         250000
+write_data  7500K_eq.data 
+
+# 1: HEAT
+fix         1 all npt temp 7500.0 7750.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         1000000
+
+# 2: HOLD
+fix         1 all npt temp 7750.0 7750.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         500000
+write_data  7750K_eq.data 
+
+# 1: HEAT
+fix         1 all npt temp 7750.0 8000.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         1000000
+
+# 2: HOLD
+fix         1 all npt temp 8000.0 8000.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         500000
+write_data  8000K_eq.data 
+
+# 1: HEAT
+fix         1 all npt temp 8000.0 8250.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         1000000
+
+# 2: HOLD
+fix         1 all npt temp 8250.0 8250.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         250000
+write_data  8250K_eq.data 
+
+# 1: HEAT
+fix         1 all npt temp 8250.0 8500.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         1000000
+
+# 2: HOLD
+fix         1 all npt temp 8500.0 8500.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         100000
+write_data  8500K_eq.data 
+
+# 1: HEAT
+fix         1 all npt temp 8500.0 8500.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         1000000
+
+# 2: HOLD
+fix         1 all npt temp 8750.0 8750.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         100000
+write_data  8750K_eq.data 
+
+# COOL BACK DOWN
+fix         1 all npt temp 8750.0 300.0 ${Tdamp} x 0 0 500 y 0 0 500
+run         500000
+
+# Analyze defects
+min_style cg
+minimize 1e-6 1e-8 100000 1000000
+run 0
+write_data minimized_graphene.data
