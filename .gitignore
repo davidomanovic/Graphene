@@ -61,3 +61,10 @@ __pycache__/
 # VSCode or editor config
 .vscode/
 *.code-workspace
+output/nvt/velocities.txt
+output/pictures/crystal.svg
+*.svg
+*.data
+*.svg
+*.txt
+*.txt

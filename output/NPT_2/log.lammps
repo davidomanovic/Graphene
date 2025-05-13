@@ -1,0 +1,110 @@
+LAMMPS (7 Feb 2024 - Development - patch_7Feb2024_update1-35-g81609d04e3)
+units       metal
+dimension   2
+boundary    p p p
+newton      on
+atom_style  atomic
+read_data   8250K_eq.data
+Reading data file ...
+  orthogonal box = (-3.0333428 -3.2854386 -10) to (173.43334 172.99144 10)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  11040 atoms
+  reading velocities ...
+  11040 velocities
+  read_data CPU = 0.171 seconds
+fix         f2d all enforce2d
+pair_style  airebo 3.0 1 1
+pair_coeff  * * CH.airebo C
+Reading airebo potential file CH.airebo with DATE: 2011-10-25
+timestep    0.0001
+
+min_style cg
+minimize 1e-6 1e-8 100000 1000000
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12.2
+  ghost atom cutoff = 12.2
+  binsize = 6.1, bins = 29 29 4
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair airebo, perpetual
+      attributes: full, newton on, ghost
+      pair build: full/bin/ghost
+      stencil: full/ghost/bin/2d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 12.45 | 12.45 | 12.45 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   8285.9216     -70360.347      0             -62478.211      307405.33    
+        57   8285.9216     -77615.2        0             -69733.064     -483548.94    
+Loop time of 16.5622 on 1 procs for 57 steps with 11040 atoms
+
+97.5% CPU use with 1 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+     -70360.3470463016  -77615.1301519294  -77615.1999288025
+  Force two-norm initial, final = 1124.3742 29.81445
+  Force max component initial, final = 47.329076 8.4844348
+  Final line search alpha, max atom move = 0.0034871119 0.029586174
+  Iterations, force evaluations = 57 90
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 16.526     | 16.526     | 16.526     |   0.0 | 99.78
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.003326   | 0.003326   | 0.003326   |   0.0 |  0.02
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.0032095  | 0.0032095  | 0.0032095  |   0.0 |  0.02
+Other   |            | 0.02947    |            |       |  0.18
+
+Nlocal:          11040 ave       11040 max       11040 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           3253 ave        3253 max        3253 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:  1.81955e+06 ave 1.81955e+06 max 1.81955e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1819550
+Ave neighs/atom = 164.81431
+Neighbor list builds = 0
+Dangerous builds = 0
+run 0
+WARNING: No fixes with time integration, atoms won't move (../verlet.cpp:60)
+Per MPI rank memory allocation (min/avg/max) = 11.32 | 11.32 | 11.32 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+        57   8285.9216     -77615.2        0             -69733.064     -483548.94    
+Loop time of 1.252e-06 on 1 procs for 0 steps with 11040 atoms
+
+319.5% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1.252e-06  |            |       |100.00
+
+Nlocal:          11040 ave       11040 max       11040 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           3250 ave        3250 max        3250 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:  1.81397e+06 ave 1.81397e+06 max 1.81397e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1813970
+Ave neighs/atom = 164.30888
+Neighbor list builds = 0
+Dangerous builds = 0
+write_data 8250K_min.data
+System init for write_data ...
+Total wall time: 0:00:17

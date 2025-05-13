@@ -1,0 +1,70 @@
+LAMMPS (7 Feb 2024 - Development - patch_7Feb2024_update1-35-g81609d04e3)
+units       metal
+dimension   2
+boundary    p p p
+newton      on
+atom_style  atomic
+
+read_data   minimized_8300K.data
+Reading data file ...
+  orthogonal box = (0 0 -10) to (170.4 169.706 10)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  11040 atoms
+  reading velocities ...
+  11040 velocities
+  read_data CPU = 0.084 seconds
+fix         f2d all enforce2d
+pair_style  airebo 3.0 1 1
+pair_coeff  * * CH.airebo C
+Reading airebo potential file CH.airebo with DATE: 2011-10-25
+timestep    0.0001
+
+dump 2 all atom 1 minimized_8300K.lammpstrj
+dump_modify 2 scale no
+run 0
+WARNING: No fixes with time integration, atoms won't move (../verlet.cpp:60)
+Neighbor list info ...
+  update: every = 1 steps, delay = 0 steps, check = yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 12.2
+  ghost atom cutoff = 12.2
+  binsize = 6.1, bins = 28 28 4
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair airebo, perpetual
+      attributes: full, newton on, ghost
+      pair build: full/bin/ghost
+      stencil: full/ghost/bin/2d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 11.71 | 11.71 | 11.71 Mbytes
+   Step          Temp          E_pair         E_mol          TotEng         Press     
+         0   50.731763     -81774.275      0             -81726.016     -647808.75    
+Loop time of 1.832e-06 on 1 procs for 0 steps with 11040 atoms
+
+0.0% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1.832e-06  |            |       |100.00
+
+Nlocal:          11040 ave       11040 max       11040 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:           3326 ave        3326 max        3326 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:              0 ave           0 max           0 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+FullNghs:  1.92079e+06 ave 1.92079e+06 max 1.92079e+06 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1920786
+Ave neighs/atom = 173.98424
+Neighbor list builds = 0
+Dangerous builds = 0
+undump 2  
+Total wall time: 0:00:00
