@@ -1,8 +1,8 @@
 a  = 1.42;        % lattice param (Å)
-nx = 10;          
+nx = 12;          
 ny = round(sqrt(3) * nx);
 
-filename = 'graphene.dat';
+filename = './mac_model.dat';
 writeresults = true;
 showresults = true;
 

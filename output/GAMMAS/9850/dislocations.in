@@ -1,0 +1,72 @@
+units       metal
+dimension   2
+boundary    p p p
+newton      on
+atom_style  atomic
+read_data   graphene.dat
+fix         f2d all enforce2d
+pair_style  airebo 3.0 1 1
+pair_coeff  * * CH.airebo C
+timestep    0.0001
+
+# Calculations
+compute     peatom all pe/atom
+compute pe  all reduce sum c_peatom
+# ---
+variable    ke equal ke
+variable    s equal step
+variable    T equal temp
+variable    E equal etotal
+variable    PEatom equal c_pe/count(all)
+variable    Tdamp equal $(100.0*dt)
+variable    targetTemp equal 9750
+variable    N_prod equal 985000
+variable    N_eq equal 1000000
+
+fix         stats all print     1000 "${s} ${T} ${E} ${ke} ${PEatom}" file energy_${targetTemp}.txt screen no
+dump        melting  all atom   10000 graphene_${targetTemp}.lammpstrj 
+dump_modify melting  scale no
+
+velocity    all create 300.0 12345 mom yes rot yes dist gaussian
+fix         fnvt all nvt temp 300 300 ${Tdamp}
+run         ${N_eq}
+unfix       fnvt
+
+fix         fnvt all nvt temp 300 ${targetTemp} ${Tdamp}
+run         ${N_prod}
+unfix       fnvt
+
+fix         fnvt all nvt temp ${targetTemp} ${targetTemp} ${Tdamp}
+run         ${N_eq}
+unfix       fnvt
+
+fix         fnvt all nvt temp ${targetTemp} 300 ${Tdamp}
+run         ${N_prod}
+unfix       fnvt
+
+minimize     1.0e-8 1.0e-8 100000 1000000
+run          0
+
+fix         fnvt all nvt temp 300 ${targetTemp} ${Tdamp}
+run         ${N_prod}
+unfix       fnvt
+
+fix         fnvt all nvt temp ${targetTemp} ${targetTemp} ${Tdamp}
+run         ${N_eq}
+unfix       fnvt
+
+fix         fnvt all nvt temp ${targetTemp} 300 ${Tdamp}
+run         ${N_prod}
+unfix       fnvt
+
+minimize     1.0e-8 1.0e-8 100000 1000000
+run          0
+
+write_data   min_${targetTemp}K.data
+
+velocity    all create 300.0 12345 mom yes rot yes dist gaussian
+fix         fnvt all nvt temp 300 300 ${Tdamp}
+run         ${N_eq}
+unfix       fnvt
+
+write_data   anneal_${targetTemp}K.data

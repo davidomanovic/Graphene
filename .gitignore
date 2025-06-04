@@ -10,6 +10,8 @@ dump.*
 *.traj
 *.xyz
 *.vtk
+*.txt
+*.zip
 
 # Velocity or thermodynamic output
 velocities_*.eq
@@ -68,3 +70,7 @@ output/pictures/crystal.svg
 *.svg
 *.txt
 *.txt
+*.UPF
+*.lammps
+phonopy/SPOSCAR
+phonopy/phonopy_disp.yaml

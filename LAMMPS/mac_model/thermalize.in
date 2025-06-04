@@ -1,0 +1,20 @@
+
+units          metal           # metal units: energy=eV, length=Å, time=ps
+dimension      2               # treat as 3D (we will enforce 2D in z)
+boundary       p p p           # periodic in x,y; fixed (“f”) in z
+atom_style     atomic
+
+# 2) READ YOUR GRAPHENE DATA FILE
+read_data      mac_model.dat   # your initial coordinates and box bounds
+
+pair_style     airebo 3.0 1 1
+pair_coeff     * * CH.airebo C
+
+fix            f2d all enforce2d
+velocity    all create 300.0 12345 mom yes rot yes dist gaussian
+fix         fnvt all nvt temp 300 300 ${Tdamp}
+run         100000
+unfix       fnvt
+
+write_data  mac_thermal.data
+

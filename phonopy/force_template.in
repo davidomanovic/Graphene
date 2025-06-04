@@ -1,0 +1,14 @@
+units       metal
+dimension   2
+boundary    p p p
+atom_style  atomic
+read_data   __DATAFILE__
+
+pair_style  airebo 3.0 1 1
+pair_coeff  * * ../CH.airebo C
+
+fix         enf2d all enforce2d 
+# define the per‐atom force compute
+dump phonopy all custom 1 force.* id type x y z fx fy fz
+dump_modify phonopy format line "%d %d %15.8f %15.8f %15.8f %15.8f %15.8f %15.8f"
+run 0

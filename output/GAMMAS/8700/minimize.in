@@ -1,0 +1,19 @@
+units       metal
+dimension   2
+boundary    p p p
+newton      on
+atom_style  atomic
+
+variable    targetTemp equal 8700
+read_data   anneal_${targetTemp}K.data
+fix         f2d all enforce2d
+pair_style  airebo 3.0 1 1
+pair_coeff  * * CH.airebo C
+timestep    0.0001
+
+
+min_style cg
+minimize     1.0e-8 0 1000000 10000000
+run          0
+
+write_data  min_${targetTemp}K.data

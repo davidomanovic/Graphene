@@ -7,7 +7,7 @@ read_data   graphene.dat
 fix         f2d all enforce2d
 pair_style  airebo 3.0 1 1
 pair_coeff  * * CH.airebo C
-timestep    0.0001
+timestep    0.001
 
 # Calculations
 compute     peatom all pe/atom
@@ -20,10 +20,10 @@ variable    E equal etotal
 variable    PEatom equal c_pe/count(all)
 variable    Tdamp equal $(100.0*dt)
 
-variable    targetTemp equal 8200 # target temperature to heat up to
+variable    targetTemp equal 9750 # target temperature to heat up to
 
 fix         stats all print     10000 "${s} ${T} ${E} ${ke} ${PEatom}" file energy_${targetTemp}.txt screen no
-dump        melting  all atom   10000 graphene_${targetTemp}.lammpstrj
+dump        melting  all atom   10000 graphene_${targetTemp}.lammpstrj 
 dump        vel all  custom      10000 velocities_${targetTemp}.txt id vx vy vz
 
 
@@ -32,21 +32,17 @@ fix         fnvt all nvt temp 300 300 ${Tdamp}
 run         100000
 unfix       fnvt
 
-fix         2 all langevin 300 ${targetTemp} 1 1337
-fix         3 all nve
-run         100000
-unfix       2
-unfix       3
-
-fix         fnvt all nvt temp ${targetTemp} ${targetTemp} ${Tdamp}
-run         100000
+fix         fnvt all nvt temp 300 ${targetTemp} ${Tdamp}
+run         10000000
 unfix       fnvt
 
-fix         2 all langevin ${targetTemp} 300 1 1337
-fix         3 all nve
-run         25000
-unfix       2
-unfix       3
+fix         fnvt all nvt temp ${targetTemp} ${targetTemp} ${Tdamp}
+run         1000000
+unfix       fnvt
+
+fix         fnvt all nvt temp ${targetTemp} 300 ${Tdamp}
+run         1000000
+unfix       fnvt
 
 minimize     1.0e-8 0 100000 1000000
 run          0
