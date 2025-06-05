@@ -7,3 +7,5 @@ Reference implementation of the simulations and post-processing pipeline used in
 ## Main figures
 
 The main figures are cached in the notebooks. The orientational and translational correlation functions are stored in `notebooks/analysis.ipynb`, and the structures are for instance in  `notebooks/structures.ipynb`. Most of the analysis is available in these folders.
+
+- The main LAMMPS melting protocol examples are given in `LAMMPS/melting.in`
