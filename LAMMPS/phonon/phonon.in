@@ -1,0 +1,29 @@
+units       metal
+dimension   2
+boundary    p p p
+newton      on
+atom_style  atomic
+read_data   graphene.dat
+pair_style  airebo 3.0 1 1
+pair_coeff  * * CH.airebo C
+timestep    0.001
+
+timestep   0.001
+thermo     500              
+
+fix f2d all enforce2d
+min_style fire
+minimize 1.0e-8 1.0e-8 100000 1000000
+run 0
+
+# NVT EQUILIBRATION
+velocity    all create 300.0 1337 rot yes mom yes dist gaussian
+fix         fnvt all nvt temp 300.0 300.0 0.1
+run         500000
+unfix       fnvt
+
+# NVE production run
+fix         1 all nve
+dump	    vel all custom 10 vel_crystal.dat id vx vy vz
+run         3200000
+
